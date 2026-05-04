@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>App Financeiro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: Arial; padding:20px;">
+
+  <h1>💰 App Financeiro</h1>
+
+  <input type="number" id="valor" placeholder="Valor">
+  <input type="date" id="data">
+  <button onclick="adicionar()">Adicionar</button>
+
+  <h2>Resumo</h2>
+  <p id="dia10"></p>
+  <p id="dia30"></p>
+  <p id="total"></p>
+
+  <h2>Lançamentos</h2>
+  <div id="lista"></div>
+
+<script>
+let registros = JSON.parse(localStorage.getItem('dados')) || [];
+
+function salvar() {
+  localStorage.setItem('dados', JSON.stringify(registros));
+}
+
+function adicionar() {
+  const valor = parseFloat(document.getElementById('valor').value);
+  const data = document.getElementById('data').value;
+
+  if (!valor || !data) return;
+
+  registros.push({ valor, data });
+  salvar();
+  render();
+}
+
+function calcular(inicio, fim) {
+  return registros.filter(r => {
+    const d = new Date(r.data).getDate();
+    return d >= inicio && d <= fim;
+  }).reduce((s, r) => s + r.valor, 0);
+}
+
+function render() {
+  const lista = document.getElementById('lista');
+  lista.innerHTML = '';
+
+  registros.forEach((r, i) => {
+    lista.innerHTML += `
+      <div>
+        R$ ${r.valor.toFixed(2)} - ${r.data}
+        <button onclick="remover(${i})">Excluir</button>
+      </div>`;
+  });
+
+  const total10 = calcular(21,31) + calcular(1,5);
+  const total30 = calcular(6,20);
+  const total = registros.reduce((s,r)=>s+r.valor,0);
+
+  document.getElementById('dia10').innerText = 'Dia 10: R$ ' + total10.toFixed(2);
+  document.getElementById('dia30').innerText = 'Dia 30: R$ ' + total30.toFixed(2);
+  document.getElementById('total').innerText = 'Total mês: R$ ' + total.toFixed(2);
+}
+
+function remover(i) {
+  registros.splice(i,1);
+  salvar();
+  render();
+}
+
+render();
+</script>
+
+</body>
+</html>
