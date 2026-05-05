@@ -35,7 +35,9 @@ function adicionar() {
 
   if (!valor || !data) return;
 
-  registros.push({ valor, data });
+ const empresa = document.getElementById('empresa').value;
+
+registros.push({ valor, data, empresa });
   salvar();
   render();
 }
@@ -54,7 +56,7 @@ function render() {
   registros.forEach((r, i) => {
     lista.innerHTML += `
       <div>
-        R$ ${r.valor.toFixed(2)} - ${r.data}
+       R$ ${r.valor.toFixed(2)} - ${r.empresa} - ${r.data}
         <button onclick="remover(${i})">Excluir</button>
       </div>`;
   });
