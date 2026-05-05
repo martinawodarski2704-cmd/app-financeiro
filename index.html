@@ -5,22 +5,25 @@
   <title>App Financeiro</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="font-family: Arial; padding:20px;">
+
+<body style="font-family: Arial; padding:20px; max-width:500px; margin:auto;">
 
   <h1>💰 App Financeiro</h1>
 
-<input type="text" id="empresa" placeholder="Empresa">
-<input type="number" id="valor" placeholder="Valor">
-<input type="date" id="data">
+  <input type="text" id="empresa" placeholder="Empresa"><br><br>
+  <input type="number" id="valor" placeholder="Valor"><br><br>
+  <input type="date" id="data"><br><br>
+
   <button onclick="adicionar()">Adicionar</button>
 
   <h2>Resumo</h2>
   <p id="dia10"></p>
   <p id="dia30"></p>
   <p id="total"></p>
-  
-<h2>Total por Empresa</h2>
-<div id="porEmpresa"></div>
+
+  <h2>Total por Empresa</h2>
+  <div id="porEmpresa"></div>
+
   <h2>Lançamentos</h2>
   <div id="lista"></div>
 
@@ -32,24 +35,37 @@ function salvar() {
 }
 
 function adicionar() {
+  const empresa = document.getElementById('empresa').value.trim();
   const valor = parseFloat(document.getElementById('valor').value);
   const data = document.getElementById('data').value;
 
-  if (!valor || !data) return;
+  if (!empresa || !valor || !data) {
+    alert("Preenche empresa, valor e data");
+    return;
+  }
 
- const empresa = document.getElementById('empresa').value;
+  registros.push({ empresa, valor, data });
 
-registros.push({ valor, data, empresa });
   salvar();
+  limparCampos();
   render();
 }
 
-function calcular(inicio, fim) {
-  return registros.filter(r => {
-    const d = new Date(r.data).getDate();
-    return d >= inicio && d <= fim;
-  }).reduce((s, r) => s + r.valor, 0);
+function limparCampos() {
+  document.getElementById('empresa').value = '';
+  document.getElementById('valor').value = '';
+  document.getElementById('data').value = '';
 }
+
+function calcular(inicio, fim) {
+  return registros
+    .filter(r => {
+      const d = new Date(r.data).getDate();
+      return d >= inicio && d <= fim;
+    })
+    .reduce((s, r) => s + r.valor, 0);
+}
+
 function calcularPorEmpresa() {
   const totais = {};
 
@@ -62,37 +78,43 @@ function calcularPorEmpresa() {
 
   return totais;
 }
+
 function render() {
   const lista = document.getElementById('lista');
   const porEmpresaDiv = document.getElementById('porEmpresa');
-const totais = calcularPorEmpresa();
 
-porEmpresaDiv.innerHTML = '';
-
-for (let empresa in totais) {
-  porEmpresaDiv.innerHTML += `
-    <div>
-      ${empresa}: R$ ${totais[empresa].toFixed(2)}
-    </div>
-  `;
-}
   lista.innerHTML = '';
+  porEmpresaDiv.innerHTML = '';
 
+  // TOTAL POR EMPRESA
+  const totais = calcularPorEmpresa();
+
+  for (let empresa in totais) {
+    porEmpresaDiv.innerHTML += `
+      <div style="margin-bottom:5px;">
+        <strong>${empresa}</strong>: R$ ${totais[empresa].toFixed(2)}
+      </div>
+    `;
+  }
+
+  // LISTA
   registros.forEach((r, i) => {
     lista.innerHTML += `
-      <div>
-       R$ ${r.valor.toFixed(2)} - ${r.empresa} - ${r.data}
+      <div style="margin-bottom:8px; border-bottom:1px solid #ccc; padding-bottom:5px;">
+        R$ ${r.valor.toFixed(2)} - ${r.empresa} - ${r.data}
         <button onclick="remover(${i})">Excluir</button>
-      </div>`;
+      </div>
+    `;
   });
 
+  // RESUMO
   const total10 = calcular(21,31) + calcular(1,5);
   const total30 = calcular(6,20);
   const total = registros.reduce((s,r)=>s+r.valor,0);
 
-  document.getElementById('dia10').innerText = 'Dia 10: R$ ' + total10.toFixed(2);
-  document.getElementById('dia30').innerText = 'Dia 30: R$ ' + total30.toFixed(2);
-  document.getElementById('total').innerText = 'Total mês: R$ ' + total.toFixed(2);
+  document.getElementById('dia10').innerText = '💰 Dia 10: R$ ' + total10.toFixed(2);
+  document.getElementById('dia30').innerText = '💰 Dia 30: R$ ' + total30.toFixed(2);
+  document.getElementById('total').innerText = '📊 Total mês: R$ ' + total.toFixed(2);
 }
 
 function remover(i) {
