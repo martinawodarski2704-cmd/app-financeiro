@@ -18,7 +18,9 @@
   <p id="dia10"></p>
   <p id="dia30"></p>
   <p id="total"></p>
-
+  
+<h2>Total por Empresa</h2>
+<div id="porEmpresa"></div>
   <h2>Lançamentos</h2>
   <div id="lista"></div>
 
@@ -48,9 +50,32 @@ function calcular(inicio, fim) {
     return d >= inicio && d <= fim;
   }).reduce((s, r) => s + r.valor, 0);
 }
+function calcularPorEmpresa() {
+  const totais = {};
 
+  registros.forEach(r => {
+    if (!totais[r.empresa]) {
+      totais[r.empresa] = 0;
+    }
+    totais[r.empresa] += r.valor;
+  });
+
+  return totais;
+}
 function render() {
   const lista = document.getElementById('lista');
+  const porEmpresaDiv = document.getElementById('porEmpresa');
+const totais = calcularPorEmpresa();
+
+porEmpresaDiv.innerHTML = '';
+
+for (let empresa in totais) {
+  porEmpresaDiv.innerHTML += `
+    <div>
+      ${empresa}: R$ ${totais[empresa].toFixed(2)}
+    </div>
+  `;
+}
   lista.innerHTML = '';
 
   registros.forEach((r, i) => {
